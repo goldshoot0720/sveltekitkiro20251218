@@ -1,196 +1,460 @@
 <script>
-	let subscriptionCount = 0;
-	let foodCount = 0;
-	let totalCost = 0;
+	import { onMount } from 'svelte';
+	
+	let stats = {
+		videos: 0,
+		images: 0,
+		totalSize: '0 MB'
+	};
+	
+	let loading = true;
+	
+	onMount(async () => {
+		await loadStats();
+	});
+	
+	async function loadStats() {
+		try {
+			// 載入圖片統計
+			const imagesResponse = await fetch('/api/images');
+			const imagesData = await imagesResponse.json();
+			
+			if (imagesData.success) {
+				stats.images = imagesData.total;
+			}
+			
+			// 影片數量暫時硬編碼，可以後續添加 API
+			stats.videos = 2;
+			stats.totalSize = '150 MB';
+			
+			loading = false;
+		} catch (error) {
+			console.error('載入統計失敗:', error);
+			loading = false;
+		}
+	}
 </script>
 
-<div class="dashboard">
-	<div class="hero-card">
-		<div class="hero-icon">🏢</div>
-		<h1>鋒兄塗哥公開資訊</h1>
-		<p class="subtitle">PROFESSIONAL BUSINESS SOLUTIONS</p>
-		<p class="copyright">©版權所有 2025～2125 | 專業管理系統解決方案</p>
-		<p class="tech-stack">
-			前端使用Svelte（SvelteKit） | 後端使用 Sanity | 影片存放於 Sanity | 
-			網頁存放於 DigitalOcean（App Platform）
-		</p>
+<div class="home-page">
+	<div class="hero-section">
+		<div class="hero-content">
+			<h1 class="hero-title">
+				<span class="hero-icon">🎬</span>
+				鋒兄媒體庫
+			</h1>
+			<p class="hero-description">
+				集中管理您的影片和圖片收藏，支援智能分類和快速搜尋
+			</p>
+		</div>
 	</div>
 
-	<h2 class="section-title">鋒兄儀表板</h2>
-
-	<div class="stats-grid">
-		<div class="stat-card blue">
-			<div class="stat-icon">📋</div>
-			<div class="stat-content">
-				<h3>訂閱數量</h3>
-				<div class="stat-value">{subscriptionCount}</div>
-				<div class="stat-label">項目</div>
-			</div>
-			<button class="stat-action">✏️</button>
+	<div class="stats-section">
+		<div class="stats-container">
+			<h2 class="section-title">📊 媒體統計</h2>
+			
+			{#if loading}
+				<div class="loading">
+					<div class="loading-spinner">⏳</div>
+					<p>載入統計中...</p>
+				</div>
+			{:else}
+				<div class="stats-grid">
+					<div class="stat-card videos">
+						<div class="stat-icon">🎬</div>
+						<div class="stat-content">
+							<div class="stat-number">{stats.videos}</div>
+							<div class="stat-label">影片</div>
+						</div>
+					</div>
+					
+					<div class="stat-card images">
+						<div class="stat-icon">🖼️</div>
+						<div class="stat-content">
+							<div class="stat-number">{stats.images}</div>
+							<div class="stat-label">圖片</div>
+						</div>
+					</div>
+					
+					<div class="stat-card storage">
+						<div class="stat-icon">💾</div>
+						<div class="stat-content">
+							<div class="stat-number">{stats.totalSize}</div>
+							<div class="stat-label">總大小</div>
+						</div>
+					</div>
+				</div>
+			{/if}
 		</div>
+	</div>
 
-		<div class="stat-card green">
-			<div class="stat-icon">🍱</div>
-			<div class="stat-content">
-				<h3>食物庫存</h3>
-				<div class="stat-value">{foodCount}</div>
-				<div class="stat-label">項目</div>
+	<div class="features-section">
+		<div class="features-container">
+			<h2 class="section-title">✨ 功能特色</h2>
+			
+			<div class="features-grid">
+				<div class="feature-card">
+					<div class="feature-icon">🎬</div>
+					<h3 class="feature-title">影片管理</h3>
+					<p class="feature-description">
+						支援多種影片格式，提供線上播放和快取管理功能
+					</p>
+					<a href="/videos" class="feature-link">
+						前往影片庫 →
+					</a>
+				</div>
+				
+				<div class="feature-card">
+					<div class="feature-icon">🖼️</div>
+					<h3 class="feature-title">圖片庫</h3>
+					<p class="feature-description">
+						智能分類您的圖片，支援快速搜尋和全螢幕預覽
+					</p>
+					<a href="/gallery" class="feature-link">
+						前往圖片庫 →
+					</a>
+				</div>
+				
+				<div class="feature-card">
+					<div class="feature-icon">🔍</div>
+					<h3 class="feature-title">智能搜尋</h3>
+					<p class="feature-description">
+						根據檔名、分類和內容快速找到您需要的媒體文件
+					</p>
+				</div>
+				
+				<div class="feature-card">
+					<div class="feature-icon">📱</div>
+					<h3 class="feature-title">響應式設計</h3>
+					<p class="feature-description">
+						完美適配桌面和行動裝置，隨時隨地管理您的媒體
+					</p>
+				</div>
 			</div>
-			<button class="stat-action">📊</button>
 		</div>
+	</div>
 
-		<div class="stat-card orange">
-			<div class="stat-icon">💰</div>
-			<div class="stat-content">
-				<h3>每月總計</h3>
-				<div class="stat-value">NT$ {totalCost}</div>
-				<div class="stat-label">約定總計</div>
+	<div class="quick-actions">
+		<div class="actions-container">
+			<h2 class="section-title">🚀 快速操作</h2>
+			
+			<div class="actions-grid">
+				<a href="/videos" class="action-btn primary">
+					<span class="action-icon">🎬</span>
+					<span class="action-text">瀏覽影片</span>
+				</a>
+				
+				<a href="/gallery" class="action-btn secondary">
+					<span class="action-icon">🖼️</span>
+					<span class="action-text">瀏覽圖片</span>
+				</a>
 			</div>
-			<button class="stat-action">🗑️</button>
 		</div>
 	</div>
 </div>
 
 <style>
-	.dashboard {
-		max-width: 800px;
+	.home-page {
+		max-width: 1200px;
 		margin: 0 auto;
+		padding: 0 20px;
 	}
-
-	.hero-card {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		color: white;
-		padding: 48px 32px;
-		border-radius: 24px;
+	
+	.hero-section {
 		text-align: center;
-		margin-bottom: 32px;
-		box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+		padding: 60px 0;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		margin: -20px -20px 40px -20px;
+		border-radius: 0 0 32px 32px;
+		color: white;
 	}
-
-	.hero-icon {
-		font-size: 64px;
-		margin-bottom: 16px;
+	
+	.hero-content {
+		max-width: 600px;
+		margin: 0 auto;
+		padding: 0 20px;
 	}
-
-	.hero-card h1 {
-		margin: 0 0 8px 0;
-		font-size: 28px;
-	}
-
-	.subtitle {
-		font-size: 12px;
-		letter-spacing: 2px;
-		opacity: 0.9;
-		margin: 0 0 16px 0;
-	}
-
-	.copyright {
-		font-size: 14px;
-		margin: 0 0 8px 0;
-	}
-
-	.tech-stack {
-		font-size: 12px;
-		opacity: 0.85;
-		margin: 0;
-		line-height: 1.6;
-	}
-
-	.section-title {
-		font-size: 24px;
-		margin: 32px 0 24px 0;
-		color: #2c3e50;
-	}
-
-	.stats-grid {
-		display: grid;
-		gap: 20px;
-		grid-template-columns: 1fr;
-	}
-
-	.stat-card {
-		background: white;
-		border-radius: 16px;
-		padding: 24px;
-		display: flex;
-		align-items: center;
-		gap: 16px;
-		box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-		position: relative;
-	}
-
-	.stat-icon {
+	
+	.hero-title {
 		font-size: 48px;
-		width: 72px;
-		height: 72px;
+		font-weight: 700;
+		margin: 0 0 20px 0;
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		gap: 16px;
+	}
+	
+	.hero-icon {
+		font-size: 56px;
+	}
+	
+	.hero-description {
+		font-size: 18px;
+		margin: 0;
+		opacity: 0.9;
+		line-height: 1.6;
+	}
+	
+	.stats-section {
+		margin-bottom: 60px;
+	}
+	
+	.stats-container {
+		background: white;
+		padding: 40px;
+		border-radius: 24px;
+		box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+	}
+	
+	.section-title {
+		text-align: center;
+		font-size: 28px;
+		margin: 0 0 32px 0;
+		color: #2c3e50;
+	}
+	
+	.loading {
+		text-align: center;
+		padding: 40px;
+		color: #7f8c8d;
+	}
+	
+	.loading-spinner {
+		font-size: 48px;
+		margin-bottom: 16px;
+		animation: spin 2s linear infinite;
+	}
+	
+	@keyframes spin {
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
+	}
+	
+	.stats-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 24px;
+	}
+	
+	.stat-card {
+		display: flex;
+		align-items: center;
+		gap: 20px;
+		padding: 24px;
 		border-radius: 16px;
+		transition: transform 0.3s;
 	}
-
-	.stat-card.blue .stat-icon {
-		background: #e3f2fd;
+	
+	.stat-card:hover {
+		transform: translateY(-4px);
 	}
-
-	.stat-card.green .stat-icon {
-		background: #e8f5e9;
+	
+	.stat-card.videos {
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		color: white;
 	}
-
-	.stat-card.orange .stat-icon {
-		background: #fff3e0;
+	
+	.stat-card.images {
+		background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+		color: white;
 	}
-
+	
+	.stat-card.storage {
+		background: linear-gradient(135deg, #fd79a8 0%, #e84393 100%);
+		color: white;
+	}
+	
+	.stat-icon {
+		font-size: 48px;
+		flex-shrink: 0;
+	}
+	
 	.stat-content {
 		flex: 1;
 	}
-
-	.stat-content h3 {
-		margin: 0 0 8px 0;
-		font-size: 14px;
-		color: #666;
-	}
-
-	.stat-value {
-		font-size: 28px;
+	
+	.stat-number {
+		font-size: 32px;
 		font-weight: 700;
 		margin-bottom: 4px;
 	}
-
-	.stat-card.blue .stat-value {
-		color: #2196f3;
-	}
-
-	.stat-card.green .stat-value {
-		color: #4caf50;
-	}
-
-	.stat-card.orange .stat-value {
-		color: #ff9800;
-	}
-
+	
 	.stat-label {
-		font-size: 12px;
-		color: #999;
+		font-size: 16px;
+		opacity: 0.9;
 	}
-
-	.stat-action {
-		background: none;
-		border: none;
+	
+	.features-section {
+		margin-bottom: 60px;
+	}
+	
+	.features-container {
+		background: white;
+		padding: 40px;
+		border-radius: 24px;
+		box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+	}
+	
+	.features-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+		gap: 24px;
+	}
+	
+	.feature-card {
+		padding: 32px 24px;
+		border: 2px solid #f1f3f4;
+		border-radius: 16px;
+		text-align: center;
+		transition: all 0.3s;
+	}
+	
+	.feature-card:hover {
+		border-color: #667eea;
+		transform: translateY(-4px);
+		box-shadow: 0 8px 24px rgba(102, 126, 234, 0.15);
+	}
+	
+	.feature-icon {
+		font-size: 48px;
+		margin-bottom: 16px;
+	}
+	
+	.feature-title {
 		font-size: 20px;
-		cursor: pointer;
-		padding: 8px;
-		opacity: 0.6;
-		transition: opacity 0.2s;
+		font-weight: 600;
+		margin: 0 0 12px 0;
+		color: #2c3e50;
 	}
-
-	.stat-action:hover {
-		opacity: 1;
+	
+	.feature-description {
+		font-size: 14px;
+		color: #7f8c8d;
+		line-height: 1.6;
+		margin: 0 0 20px 0;
 	}
-
-	@media (min-width: 768px) {
+	
+	.feature-link {
+		display: inline-block;
+		color: #667eea;
+		text-decoration: none;
+		font-weight: 500;
+		transition: color 0.2s;
+	}
+	
+	.feature-link:hover {
+		color: #5a6fd8;
+	}
+	
+	.quick-actions {
+		margin-bottom: 40px;
+	}
+	
+	.actions-container {
+		background: white;
+		padding: 40px;
+		border-radius: 24px;
+		box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+	}
+	
+	.actions-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 20px;
+	}
+	
+	.action-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
+		padding: 20px 32px;
+		border-radius: 16px;
+		text-decoration: none;
+		font-weight: 600;
+		font-size: 16px;
+		transition: all 0.3s;
+	}
+	
+	.action-btn.primary {
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		color: white;
+	}
+	
+	.action-btn.secondary {
+		background: linear-gradient(135deg, #00d4aa 0%, #00b894 100%);
+		color: white;
+	}
+	
+	.action-btn:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+	}
+	
+	.action-icon {
+		font-size: 24px;
+	}
+	
+	@media (max-width: 768px) {
+		.home-page {
+			padding: 0 16px;
+		}
+		
+		.hero-section {
+			padding: 40px 0;
+			margin: -16px -16px 32px -16px;
+		}
+		
+		.hero-title {
+			font-size: 36px;
+			flex-direction: column;
+			gap: 8px;
+		}
+		
+		.hero-icon {
+			font-size: 48px;
+		}
+		
+		.hero-description {
+			font-size: 16px;
+		}
+		
+		.stats-container,
+		.features-container,
+		.actions-container {
+			padding: 24px;
+		}
+		
+		.section-title {
+			font-size: 24px;
+		}
+		
 		.stats-grid {
-			grid-template-columns: repeat(2, 1fr);
+			grid-template-columns: 1fr;
+		}
+		
+		.stat-card {
+			padding: 20px;
+		}
+		
+		.stat-icon {
+			font-size: 40px;
+		}
+		
+		.stat-number {
+			font-size: 28px;
+		}
+		
+		.features-grid {
+			grid-template-columns: 1fr;
+		}
+		
+		.feature-card {
+			padding: 24px 20px;
+		}
+		
+		.actions-grid {
+			grid-template-columns: 1fr;
 		}
 	}
 </style>
