@@ -202,8 +202,8 @@
 			<div class="stat-card">
 				<div class="stat-icon">📊</div>
 				<div class="stat-content">
-					<h3>活躍訂閱</h3>
-					<p class="stat-value">{subscriptions.filter(s => s.status === 'active').length}</p>
+					<h3>訂閱總數</h3>
+					<p class="stat-value">{subscriptions.length}</p>
 				</div>
 			</div>
 			
