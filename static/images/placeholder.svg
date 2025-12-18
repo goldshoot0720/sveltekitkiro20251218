@@ -1,0 +1,6 @@
+<svg width="300" height="200" viewBox="0 0 300 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+<rect width="300" height="200" fill="#F8F9FA"/>
+<rect x="125" y="75" width="50" height="50" fill="#DEE2E6"/>
+<path d="M135 95L145 105L155 95L165 105V115H135V95Z" fill="#9CA3AF"/>
+<text x="150" y="145" font-family="Arial, sans-serif" font-size="12" fill="#6B7284" text-anchor="middle">圖片載入失敗</text>
+</svg>
