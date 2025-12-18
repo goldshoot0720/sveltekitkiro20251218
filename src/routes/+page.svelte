@@ -63,7 +63,11 @@
 						</div>
 						<div class="tech-item">
 							<span class="tech-icon">🌐</span>
+<<<<<<< HEAD
 							<span class="tech-label">網頁存放：Vercel</span>
+=======
+							<span class="tech-label">網頁存放：DigitalOcean</span>
+>>>>>>> 557e4bbf26ea908c0af94290147406b414e8ce67
 						</div>
 						<div class="tech-item">
 							<span class="tech-icon">🎬</span>
