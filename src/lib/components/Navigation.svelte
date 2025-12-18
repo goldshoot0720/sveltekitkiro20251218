@@ -8,8 +8,8 @@
 	<div class="nav-container">
 		<div class="nav-brand">
 			<a href="/" class="brand-link">
-				<span class="brand-icon">🎬</span>
-				<span class="brand-text">鋒兄媒體庫</span>
+				<span class="brand-icon">🤖</span>
+				<span class="brand-text">鋒兄AI資訊系統</span>
 			</a>
 		</div>
 		

@@ -39,12 +39,39 @@
 	<div class="hero-section">
 		<div class="hero-content">
 			<h1 class="hero-title">
-				<span class="hero-icon">🎬</span>
-				鋒兄媒體庫
+				<span class="hero-icon">🤖</span>
+				鋒兄AI資訊系統
 			</h1>
 			<p class="hero-description">
 				集中管理您的影片和圖片收藏，支援智能分類和快速搜尋
 			</p>
+			
+			<div class="hero-footer">
+				<div class="copyright">
+					<p class="copyright-text">鋒兄塗哥公關資訊© 版權所有 2025～2125</p>
+				</div>
+				
+				<div class="tech-info">
+					<div class="tech-stack">
+						<div class="tech-item">
+							<span class="tech-icon">⚡</span>
+							<span class="tech-label">前端：Svelte (SvelteKit)</span>
+						</div>
+						<div class="tech-item">
+							<span class="tech-icon">🗄️</span>
+							<span class="tech-label">後端：Sanity</span>
+						</div>
+						<div class="tech-item">
+							<span class="tech-icon">🌐</span>
+							<span class="tech-label">網頁存放：DigitalOcean</span>
+						</div>
+						<div class="tech-item">
+							<span class="tech-icon">🎬</span>
+							<span class="tech-label">影片存放：Sanity</span>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 
@@ -190,9 +217,60 @@
 	
 	.hero-description {
 		font-size: 18px;
-		margin: 0;
+		margin: 0 0 32px 0;
 		opacity: 0.9;
 		line-height: 1.6;
+	}
+	
+	.hero-footer {
+		margin-top: 24px;
+		padding-top: 24px;
+		border-top: 1px solid rgba(255, 255, 255, 0.2);
+	}
+	
+	.copyright {
+		margin-bottom: 20px;
+	}
+	
+	.copyright-text {
+		font-size: 14px;
+		margin: 0;
+		opacity: 0.8;
+		font-weight: 500;
+	}
+	
+	.tech-info {
+		margin-top: 16px;
+	}
+	
+	.tech-stack {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 12px;
+		max-width: 800px;
+		margin: 0 auto;
+	}
+	
+	.tech-item {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 8px;
+		padding: 8px 16px;
+		background: rgba(255, 255, 255, 0.1);
+		border-radius: 20px;
+		backdrop-filter: blur(10px);
+		font-size: 13px;
+		opacity: 0.9;
+	}
+	
+	.tech-icon {
+		font-size: 16px;
+	}
+	
+	.tech-label {
+		font-weight: 500;
+		white-space: nowrap;
 	}
 	
 	.stats-section {
@@ -417,6 +495,24 @@
 		
 		.hero-description {
 			font-size: 16px;
+		}
+		
+		.tech-stack {
+			grid-template-columns: 1fr;
+			gap: 8px;
+		}
+		
+		.tech-item {
+			padding: 6px 12px;
+			font-size: 12px;
+		}
+		
+		.tech-icon {
+			font-size: 14px;
+		}
+		
+		.copyright-text {
+			font-size: 12px;
 		}
 		
 		.stats-container,
