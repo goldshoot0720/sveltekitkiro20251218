@@ -28,7 +28,19 @@
 			loading = true;
 			const response = await fetch('/api/foods');
 			if (!response.ok) throw new Error('Failed to fetch');
-			foods = await response.json();
+			let rawFoods = await response.json();
+			
+			// 前端額外排序：按保存期限由近至遠排序
+			foods = rawFoods.sort((a, b) => {
+				// 沒有保存期限的排在最後
+				if (!a.todate && !b.todate) return 0;
+				if (!a.todate) return 1;
+				if (!b.todate) return -1;
+				
+				// 有保存期限的按日期升序排序（最快過期的在前面）
+				return new Date(a.todate) - new Date(b.todate);
+			});
+			
 			calculateTotalValue();
 			loading = false;
 		} catch (err) {
@@ -157,6 +169,10 @@
 	<div class="page-header">
 		<h1>食品管理</h1>
 		<p>管理您的食品庫存與保存期限</p>
+		<div class="sort-info">
+			<span class="sort-icon">📅</span>
+			<span>食品按保存期限排序（最快過期的在前面）</span>
+		</div>
 	</div>
 
 	{#if loading}
@@ -362,6 +378,23 @@
 	.page-header p {
 		margin: 0;
 		color: #6b7280;
+		font-size: 16px;
+	}
+	
+	.sort-info {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		margin-top: 12px;
+		padding: 8px 16px;
+		background: #f0fdf4;
+		border: 1px solid #bbf7d0;
+		border-radius: 8px;
+		font-size: 14px;
+		color: #166534;
+	}
+	
+	.sort-icon {
 		font-size: 16px;
 	}
 	

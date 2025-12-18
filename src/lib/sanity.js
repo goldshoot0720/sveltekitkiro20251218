@@ -63,7 +63,7 @@ export async function createSubscription(data) {
 
 // 食品相關函數
 export async function getFoods() {
-  const query = `*[_type == "food"] | order(_createdAt desc) {
+  const query = `*[_type == "food"] | order(todate asc, _createdAt desc) {
     _id,
     name,
     amount,
