@@ -4,71 +4,45 @@
 	let subscriptions = [];
 	let foods = [];
 	let loading = true;
+	let error = null;
 	
-	// 模擬數據 - 實際應用中應該從 API 獲取
+	// 從真實 API 獲取數據
 	onMount(async () => {
-		// 模擬 API 調用延遲
-		await new Promise(resolve => setTimeout(resolve, 1000));
-		
-		// 模擬訂閱數據
-		subscriptions = [
-			{
-				id: 1,
-				name: 'Netflix',
-				nextPayment: new Date('2024-12-25'),
-				amount: 390,
-				status: 'active'
-			},
-			{
-				id: 2,
-				name: 'Spotify',
-				nextPayment: new Date('2024-12-23'),
-				amount: 149,
-				status: 'active'
-			},
-			{
-				id: 3,
-				name: 'Adobe Creative Cloud',
-				nextPayment: new Date('2024-12-28'),
-				amount: 1680,
-				status: 'active'
-			}
-		];
-		
-		// 模擬食品數據
-		foods = [
-			{
-				id: 1,
-				name: '牛奶',
-				expiryDate: new Date('2024-12-23'),
-				category: '乳製品',
-				quantity: 2
-			},
-			{
-				id: 2,
-				name: '雞蛋',
-				expiryDate: new Date('2024-12-25'),
-				category: '蛋類',
-				quantity: 12
-			},
-			{
-				id: 3,
-				name: '麵包',
-				expiryDate: new Date('2024-12-22'),
-				category: '烘焙食品',
-				quantity: 1
-			},
-			{
-				id: 4,
-				name: '蘋果',
-				expiryDate: new Date('2024-12-30'),
-				category: '水果',
-				quantity: 5
-			}
-		];
-		
-		loading = false;
+		await loadData();
 	});
+	
+	async function loadData() {
+		try {
+			loading = true;
+			error = null;
+			
+			// 並行獲取訂閱和食品數據
+			const [subscriptionsResponse, foodsResponse] = await Promise.all([
+				fetch('/api/subscriptions'),
+				fetch('/api/foods')
+			]);
+			
+			if (subscriptionsResponse.ok) {
+				subscriptions = await subscriptionsResponse.json();
+			} else {
+				console.warn('Failed to fetch subscriptions:', subscriptionsResponse.status);
+				subscriptions = [];
+			}
+			
+			if (foodsResponse.ok) {
+				foods = await foodsResponse.json();
+			} else {
+				console.warn('Failed to fetch foods:', foodsResponse.status);
+				foods = [];
+			}
+			
+			loading = false;
+		} catch (err) {
+			console.error('Error loading data:', err);
+			error = err.message;
+			loading = false;
+		}
+	}
 	
 	// 計算即將到期的項目
 	function getItemsExpiringSoon(items, dateField, days) {
@@ -83,6 +57,7 @@
 	
 	// 格式化日期
 	function formatDate(date) {
+		if (!date) return '未設定';
 		return new Date(date).toLocaleDateString('zh-TW', {
 			month: 'short',
 			day: 'numeric'
@@ -91,6 +66,7 @@
 	
 	// 計算距離天數
 	function getDaysUntil(date) {
+		if (!date) return 0;
 		const now = new Date();
 		const target = new Date(date);
 		const diffTime = target - now;
@@ -98,10 +74,11 @@
 		return diffDays;
 	}
 	
-	$: subscriptionsIn3Days = getItemsExpiringSoon(subscriptions, 'nextPayment', 3);
-	$: subscriptionsIn7Days = getItemsExpiringSoon(subscriptions, 'nextPayment', 7);
-	$: foodsIn3Days = getItemsExpiringSoon(foods, 'expiryDate', 3);
-	$: foodsIn7Days = getItemsExpiringSoon(foods, 'expiryDate', 7);
+	// 使用真實數據結構的響應式計算
+	$: subscriptionsIn3Days = getItemsExpiringSoon(subscriptions, 'nextdate', 3);
+	$: subscriptionsIn7Days = getItemsExpiringSoon(subscriptions, 'nextdate', 7);
+	$: foodsIn7Days = getItemsExpiringSoon(foods, 'todate', 7);
+	$: foodsIn30Days = getItemsExpiringSoon(foods, 'todate', 30);
 </script>
 
 <svelte:head>
@@ -119,6 +96,11 @@
 			<div class="loading">
 				<div class="spinner"></div>
 				<p>載入中...</p>
+			</div>
+		{:else if error}
+			<div class="error">
+				<p>載入數據時發生錯誤: {error}</p>
+				<button class="retry-btn" on:click={loadData}>重新載入</button>
 			</div>
 		{:else}
 			<!-- 統計卡片 -->
@@ -144,8 +126,8 @@
 				<div class="stat-card urgent">
 					<div class="stat-icon">⚠️</div>
 					<div class="stat-content">
-						<h3>3天內到期</h3>
-						<div class="stat-number">{subscriptionsIn3Days.length + foodsIn3Days.length}</div>
+						<h3>緊急提醒</h3>
+						<div class="stat-number">{subscriptionsIn3Days.length + foodsIn7Days.length}</div>
 						<p>個項目需注意</p>
 					</div>
 				</div>
@@ -153,8 +135,8 @@
 				<div class="stat-card warning">
 					<div class="stat-icon">📅</div>
 					<div class="stat-content">
-						<h3>7天內到期</h3>
-						<div class="stat-number">{subscriptionsIn7Days.length + foodsIn7Days.length}</div>
+						<h3>近期提醒</h3>
+						<div class="stat-number">{subscriptionsIn7Days.length + foodsIn30Days.length}</div>
 						<p>個項目需關注</p>
 					</div>
 				</div>
@@ -178,11 +160,11 @@
 										<div class="item-card urgent">
 											<div class="item-info">
 												<h4>{subscription.name}</h4>
-												<p>下次付款: {formatDate(subscription.nextPayment)}</p>
-												<p class="amount">NT$ {subscription.amount}</p>
+												<p>下次付款: {formatDate(subscription.nextdate)}</p>
+												<p class="amount">NT$ {subscription.price || 0}</p>
 											</div>
 											<div class="item-status">
-												<span class="days-badge urgent">{getDaysUntil(subscription.nextPayment)}天</span>
+												<span class="days-badge urgent">{getDaysUntil(subscription.nextdate)}天</span>
 											</div>
 										</div>
 									{/each}
@@ -198,11 +180,11 @@
 										<div class="item-card warning">
 											<div class="item-info">
 												<h4>{subscription.name}</h4>
-												<p>下次付款: {formatDate(subscription.nextPayment)}</p>
-												<p class="amount">NT$ {subscription.amount}</p>
+												<p>下次付款: {formatDate(subscription.nextdate)}</p>
+												<p class="amount">NT$ {subscription.price || 0}</p>
 											</div>
 											<div class="item-status">
-												<span class="days-badge warning">{getDaysUntil(subscription.nextPayment)}天</span>
+												<span class="days-badge warning">{getDaysUntil(subscription.nextdate)}天</span>
 											</div>
 										</div>
 									{/each}
@@ -220,19 +202,19 @@
 					</div>
 					
 					<div class="alert-sections">
-						{#if foodsIn3Days.length > 0}
+						{#if foodsIn7Days.length > 0}
 							<div class="alert-group urgent">
-								<h3>🚨 3天內到期 ({foodsIn3Days.length})</h3>
+								<h3>🚨 7天內到期 ({foodsIn7Days.length})</h3>
 								<div class="item-list">
-									{#each foodsIn3Days as food}
+									{#each foodsIn7Days as food}
 										<div class="item-card urgent">
 											<div class="item-info">
 												<h4>{food.name}</h4>
-												<p>保存期限: {formatDate(food.expiryDate)}</p>
-												<p class="category">{food.category} × {food.quantity}</p>
+												<p>保存期限: {formatDate(food.todate)}</p>
+												<p class="category">{food.shop || '未知來源'} × {food.amount || 1}</p>
 											</div>
 											<div class="item-status">
-												<span class="days-badge urgent">{getDaysUntil(food.expiryDate)}天</span>
+												<span class="days-badge urgent">{getDaysUntil(food.todate)}天</span>
 											</div>
 										</div>
 									{/each}
@@ -240,19 +222,19 @@
 							</div>
 						{/if}
 						
-						{#if foodsIn7Days.length > 0}
+						{#if foodsIn30Days.length > 0}
 							<div class="alert-group warning">
-								<h3>📅 7天內到期 ({foodsIn7Days.length})</h3>
+								<h3>📅 30天內到期 ({foodsIn30Days.length})</h3>
 								<div class="item-list">
-									{#each foodsIn7Days as food}
+									{#each foodsIn30Days as food}
 										<div class="item-card warning">
 											<div class="item-info">
 												<h4>{food.name}</h4>
-												<p>保存期限: {formatDate(food.expiryDate)}</p>
-												<p class="category">{food.category} × {food.quantity}</p>
+												<p>保存期限: {formatDate(food.todate)}</p>
+												<p class="category">{food.shop || '未知來源'} × {food.amount || 1}</p>
 											</div>
 											<div class="item-status">
-												<span class="days-badge warning">{getDaysUntil(food.expiryDate)}天</span>
+												<span class="days-badge warning">{getDaysUntil(food.todate)}天</span>
 											</div>
 										</div>
 									{/each}
@@ -298,13 +280,33 @@
 		margin: 0;
 	}
 	
-	.loading {
+	.loading, .error {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 		padding: 60px 20px;
 		color: #666;
+	}
+	
+	.error {
+		color: #e74c3c;
+	}
+	
+	.retry-btn {
+		margin-top: 16px;
+		padding: 10px 20px;
+		background: #667eea;
+		color: white;
+		border: none;
+		border-radius: 8px;
+		cursor: pointer;
+		font-size: 14px;
+		transition: background-color 0.3s;
+	}
+	
+	.retry-btn:hover {
+		background: #5a67d8;
 	}
 	
 	.spinner {
