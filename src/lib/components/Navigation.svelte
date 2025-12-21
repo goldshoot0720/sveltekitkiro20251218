@@ -15,6 +15,14 @@
 		
 		<div class="nav-links">
 			<a 
+				href="/dashboard" 
+				class="nav-link {currentPath === '/dashboard' ? 'active' : ''}"
+			>
+				<span class="nav-icon">📊</span>
+				<span class="nav-text">儀表板</span>
+			</a>
+			
+			<a 
 				href="/videos" 
 				class="nav-link {currentPath === '/videos' ? 'active' : ''}"
 			>
